@@ -76,7 +76,6 @@ export async function addProperty(
     latitude: data.latitude ? Number(data.latitude) : "",
     longitude: data.longitude ? Number(data.longitude) : "",
     google_maps_link: data.google_maps_link || "",
-    images: data.images || [],
     created_at: now,
     updated_at: now,
   });
@@ -115,16 +114,6 @@ export async function updatePropertyStatus(
 
 export async function deleteProperty(id: string): Promise<void> {
   await deleteDoc(propertyDocRef(id));
-}
-
-export async function updatePropertyImages(
-  id: string,
-  images: string[]
-): Promise<void> {
-  await updateDoc(propertyDocRef(id), {
-    images,
-    updated_at: Timestamp.now(),
-  });
 }
 
 export async function markPropertySold(

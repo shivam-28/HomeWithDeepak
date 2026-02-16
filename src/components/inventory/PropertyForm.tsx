@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
-import { addProperty, updateProperty, updatePropertyImages } from "@/lib/firebase/inventory";
-import { uploadPropertyImage } from "@/lib/firebase/storage";
+import { addProperty, updateProperty } from "@/lib/firebase/inventory";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
@@ -23,7 +22,7 @@ import {
   PROPERTY_STATUSES,
   FURNISHING_TYPES,
 } from "@/lib/utils/constants";
-import { MapPin, Navigation, Upload, X, Image as ImageIcon } from "lucide-react";
+import { MapPin, Navigation } from "lucide-react";
 
 interface PropertyFormProps {
   property?: Property;
@@ -35,8 +34,6 @@ export function PropertyForm({ property, onSuccess }: PropertyFormProps) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [locating, setLocating] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<PropertyFormData>({
     project_name: property?.project_name || "",
@@ -59,7 +56,6 @@ export function PropertyForm({ property, onSuccess }: PropertyFormProps) {
     latitude: property?.latitude || "",
     longitude: property?.longitude || "",
     google_maps_link: property?.google_maps_link || "",
-    images: property?.images || [],
   });
 
   const update = (field: keyof PropertyFormData, value: unknown) => {
@@ -110,41 +106,6 @@ export function PropertyForm({ property, onSuccess }: PropertyFormProps) {
       update("google_maps_link", `https://www.google.com/maps?q=${lat},${lng}`);
     }
   }, [form.latitude, form.longitude]);
-
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    setUploading(true);
-    try {
-      const propertyId = property?.id || "temp_" + Date.now();
-      const newUrls: string[] = [];
-      for (let i = 0; i < files.length; i++) {
-        const url = await uploadPropertyImage(propertyId, files[i]);
-        newUrls.push(url);
-      }
-      const updatedImages = [...(form.images || []), ...newUrls];
-      update("images", updatedImages);
-
-      // If editing existing property, also save images immediately
-      if (property?.id) {
-        await updatePropertyImages(property.id, updatedImages);
-      }
-    } catch (error) {
-      console.error("Failed to upload image:", error);
-      alert("Failed to upload image. Please try again.");
-    } finally {
-      setUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
-
-  const removeImage = (index: number) => {
-    const updatedImages = form.images.filter((_, i) => i !== index);
-    update("images", updatedImages);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -378,59 +339,6 @@ export function PropertyForm({ property, onSuccess }: PropertyFormProps) {
         onChange={(e) => update("notes", e.target.value)}
         placeholder="Additional details..."
       />
-
-      {/* Property Images */}
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 space-y-3">
-        <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
-          <ImageIcon className="h-4 w-4" />
-          Property Images
-        </h3>
-
-        {form.images && form.images.length > 0 && (
-          <div className="grid grid-cols-3 gap-2">
-            {form.images.map((url, index) => (
-              <div key={index} className="relative group">
-                <img
-                  src={url}
-                  alt={`Property ${index + 1}`}
-                  className="h-24 w-full rounded-lg object-cover border border-gray-200"
-                />
-                <button
-                  type="button"
-                  onClick={() => removeImage(index)}
-                  className="absolute -top-1.5 -right-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleImageUpload}
-            className="hidden"
-          />
-          <Button
-            type="button"
-            size="sm"
-            variant="secondary"
-            onClick={() => fileInputRef.current?.click()}
-            disabled={uploading}
-          >
-            <Upload className="h-3.5 w-3.5" />
-            {uploading ? "Uploading..." : "Upload Images"}
-          </Button>
-          <p className="mt-1 text-xs text-gray-400">
-            JPG, PNG. Multiple files supported.
-          </p>
-        </div>
-      </div>
 
       <div className="flex gap-3 pt-2">
         <Button type="submit" loading={saving} className="flex-1">

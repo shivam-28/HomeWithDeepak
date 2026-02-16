@@ -149,7 +149,6 @@ export interface Property {
   latitude: number | "";
   longitude: number | "";
   google_maps_link: string;
-  images: string[];
   sold_to_lead_id?: string;
   sold_price?: number;
   sold_date?: string;
@@ -178,7 +177,6 @@ export interface PropertyFormData {
   latitude: number | "";
   longitude: number | "";
   google_maps_link: string;
-  images: string[];
 }
 
 export interface PropertyFiltersType {

@@ -32,7 +32,6 @@ import {
   FileText,
   Calendar,
   ExternalLink,
-  Image as ImageIcon,
   Users,
 } from "lucide-react";
 
@@ -58,7 +57,7 @@ export default function PropertyDetailPage() {
   const [updatingStatus, setUpdatingStatus] = useState(false);
   const [linkedLeads, setLinkedLeads] = useState<Lead[]>([]);
   const [showSoldModal, setShowSoldModal] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+
 
   // Subscribe to leads linked to this property
   useEffect(() => {
@@ -213,27 +212,6 @@ export default function PropertyDetailPage() {
       <div className="flex gap-2">
         <PropertyStatusBadge status={property.status} />
       </div>
-
-      {/* Property Images */}
-      {property.images && property.images.length > 0 && (
-        <Card className="space-y-2">
-          <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-1.5">
-            <ImageIcon className="h-4 w-4" />
-            Photos ({property.images.length})
-          </h3>
-          <div className="grid grid-cols-3 gap-2">
-            {property.images.map((url, index) => (
-              <img
-                key={index}
-                src={url}
-                alt={`Property ${index + 1}`}
-                className="h-24 w-full rounded-lg object-cover border border-gray-200 cursor-pointer hover:opacity-90"
-                onClick={() => setSelectedImageIndex(index)}
-              />
-            ))}
-          </div>
-        </Card>
-      )}
 
       {/* Quick Status Toggle */}
       <Card className="space-y-2">
@@ -529,38 +507,6 @@ export default function PropertyDetailPage() {
         </div>
       </Modal>
 
-      {/* Image Lightbox */}
-      {selectedImageIndex !== null && property.images && (
-        <Modal
-          open={selectedImageIndex !== null}
-          onClose={() => setSelectedImageIndex(null)}
-          title={`Photo ${selectedImageIndex + 1} of ${property.images.length}`}
-        >
-          <img
-            src={property.images[selectedImageIndex]}
-            alt={`Property photo ${selectedImageIndex + 1}`}
-            className="w-full rounded-lg"
-          />
-          <div className="mt-3 flex gap-2 justify-center">
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={selectedImageIndex === 0}
-              onClick={() => setSelectedImageIndex((prev) => (prev ?? 1) - 1)}
-            >
-              Previous
-            </Button>
-            <Button
-              size="sm"
-              variant="secondary"
-              disabled={selectedImageIndex === property.images.length - 1}
-              onClick={() => setSelectedImageIndex((prev) => (prev ?? 0) + 1)}
-            >
-              Next
-            </Button>
-          </div>
-        </Modal>
-      )}
     </div>
   );
 }
