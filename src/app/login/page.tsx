@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { signInWithGoogle } from "@/lib/firebase/auth";
@@ -11,12 +11,26 @@ import { FullPageSpinner } from "@/components/ui/Spinner";
 export default function LoginPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
     if (!loading && user) {
       router.replace("/dashboard");
     }
   }, [user, loading, router]);
+
+  const handleSignIn = async () => {
+    setError(null);
+    setSigningIn(true);
+    try {
+      await signInWithGoogle();
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      setSigningIn(false);
+    }
+  };
 
   if (loading) return <FullPageSpinner />;
   if (user) return <FullPageSpinner />;
@@ -32,8 +46,14 @@ export default function LoginPage() {
           Real estate lead management
         </p>
       </div>
+      {error && (
+        <div className="mb-4 w-full max-w-xs rounded-lg bg-red-50 p-3 text-center text-sm text-red-700">
+          {error}
+        </div>
+      )}
       <Button
-        onClick={() => signInWithGoogle()}
+        onClick={handleSignIn}
+        loading={signingIn}
         size="lg"
         className="w-full max-w-xs"
       >
