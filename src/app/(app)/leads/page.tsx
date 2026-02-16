@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useLeads } from "@/hooks/useLeads";
+import { useAuth } from "@/hooks/useAuth";
 import { LeadCard } from "@/components/leads/LeadCard";
 import { LeadSearch } from "@/components/leads/LeadSearch";
 import { LeadFilters } from "@/components/leads/LeadFilters";
@@ -12,6 +13,7 @@ import { Plus, Filter } from "lucide-react";
 
 export default function LeadsPage() {
   const { leads, loading } = useLeads();
+  const { isAdmin } = useAuth();
   const [search, setSearch] = useState("");
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<LeadFiltersType>({
@@ -83,7 +85,7 @@ export default function LeadsPage() {
       ) : (
         <div className="space-y-3">
           {filteredLeads.map((lead) => (
-            <LeadCard key={lead.id} lead={lead} />
+            <LeadCard key={lead.id} lead={lead} showCreator={isAdmin} />
           ))}
         </div>
       )}

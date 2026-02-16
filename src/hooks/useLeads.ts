@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
-import { subscribeToLeads } from "@/lib/firebase/firestore";
+import { subscribeToLeads, subscribeToAllLeads } from "@/lib/firebase/firestore";
 import { Lead } from "@/types";
 
 export function useLeads() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -18,12 +18,15 @@ export function useLeads() {
     }
 
     setLoading(true);
-    const unsubscribe = subscribeToLeads(user.uid, (leads) => {
+    const onLeads = (leads: Lead[]) => {
       setLeads(leads);
       setLoading(false);
-    });
+    };
+    const unsubscribe = isAdmin
+      ? subscribeToAllLeads(onLeads)
+      : subscribeToLeads(user.uid, onLeads);
     return unsubscribe;
-  }, [user]);
+  }, [user, isAdmin]);
 
   return { leads, loading };
 }

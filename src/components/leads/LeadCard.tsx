@@ -6,9 +6,9 @@ import { StatusBadge } from "./StatusBadge";
 import { InterestBadge } from "./InterestBadge";
 import { Lead } from "@/types";
 import { formatDate } from "@/lib/utils/dates";
-import { Phone, MapPin, Building } from "lucide-react";
+import { Phone, MapPin, Building, User } from "lucide-react";
 
-export function LeadCard({ lead }: { lead: Lead }) {
+export function LeadCard({ lead, showCreator }: { lead: Lead; showCreator?: boolean }) {
   const router = useRouter();
 
   return (
@@ -44,6 +44,13 @@ export function LeadCard({ lead }: { lead: Lead }) {
         <div className="flex items-center gap-1.5 text-sm text-gray-500">
           <MapPin className="h-3.5 w-3.5 flex-shrink-0" />
           <span className="truncate">{lead.customer_address}</span>
+        </div>
+      )}
+
+      {showCreator && lead.created_by_email && (
+        <div className="flex items-center gap-1.5 text-sm text-gray-500">
+          <User className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="truncate">{lead.created_by_email}</span>
         </div>
       )}
 
